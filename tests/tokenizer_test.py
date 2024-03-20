@@ -39,6 +39,11 @@ class test_tokenizer(unittest.TestCase):
             Token(type='operator', text='-'),
             Token(type='int_literal', text='1')
         ]
+        assert tokenize(" 3 * 1 ") == [
+            Token(type='int_literal', text='3'),
+            Token(type='operator', text='*'),
+            Token(type='int_literal', text='1')
+        ]
 
     def test_tokenizer_lines(self):
         assert tokenize(" 3 - \n1 ") == [
@@ -99,6 +104,19 @@ class test_tokenizer(unittest.TestCase):
             Token(type='int_literal', text='1'),
             Token(type='parenthesis', text=';')
         ]
+
+class TestPointerFeatures_token(unittest.TestCase):
+    def test_token_dereference(self):
+        tokens = tokenize("var x: Int* = &y;")
+        assert tokens == [Token(type='identifier', text='var'),
+                          Token(type='identifier', text='x'),
+                          Token(type='operator', text=':'),
+                          Token(type='identifier', text='Int'),
+                          Token(type='operator', text='*'), # while be handled in parser.
+                          Token(type='operator', text='='),
+                          Token(type='address_of', text='&'),
+                          Token(type='identifier', text='y'),
+                          Token(type='parenthesis', text=';')]
 
 
 if __name__ == '__main__':

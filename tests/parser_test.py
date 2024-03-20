@@ -212,5 +212,17 @@ class test_parser_funcdel(unittest.TestCase):
         parsed_module = parse(tokens)
         print(parsed_module)
 
+class TestPointerFeatures_parse(unittest.TestCase):
+    def test_token_dereference(self):
+        tokens = tokenize("{ var x: Int* = &y; }")
+        print(tokens)
+        par = parse(tokens)
+        assert par == ast.Module(functions=[],
+                                 expression=ast.Block(
+                                     expressions=[ast.VarDecl(name='x', value=ast.Identifier(name='y'),
+                                                              type_annotation=ast.PointerType(base_type='Int'))],
+                                                  result_expression=None))
+
+
 if __name__ == '__main__':
     unittest.main()

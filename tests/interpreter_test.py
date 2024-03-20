@@ -1,9 +1,11 @@
 import unittest
 
+from src.compiler import ast
 from src.compiler.SymTab import SymTab, add_builtin_symbols
-from src.compiler.interpreter import interpret
+from src.compiler.interpreter import interpret, BreakException
 from src.compiler.parser import parse
 from src.compiler.tokenizer import tokenize
+from src.compiler.types import Int, Unit
 
 
 class MyTestCase(unittest.TestCase):
@@ -208,6 +210,22 @@ class TestInterpreterFunctions(unittest.TestCase):
         """
         result = interpret(parse(tokenize(source_code)), self.symtab)
         self.assertEqual(result, 13)
+
+class TestInterpreter(unittest.TestCase):
+    def setUp(self):
+        self.symtab = SymTab()
+
+    def test_break_in_loop(self):
+        loop = ast.WhileExpr(
+            condition=ast.Literal(True),  # 无限循环条件
+            body=ast.Block(expressions=[ast.Break()], result_expression=None)  # 循环体中立即 break
+        )
+        # 期望循环能够被 break 打断，不抛出异常
+        try:
+            interpret(loop, self.symtab)
+        except BreakException:
+            self.fail("BreakException should not escape the loop.")
+
 
 if __name__ == '__main__':
     unittest.main()

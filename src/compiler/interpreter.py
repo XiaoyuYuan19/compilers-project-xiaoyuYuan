@@ -6,6 +6,13 @@ from src.compiler.type_checker import typecheck
 
 Value = int | bool | None
 
+class BreakException(Exception):
+    def __init__(self, value=None):
+        self.value = value
+
+class ContinueException(Exception):
+    pass
+
 def interpret(node: ast.Expression, symtab: SymTab) -> Value:
     match node:
         case ast.Literal():
@@ -81,18 +88,30 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
             symtab.leave_scope()
             return result
 
-        case ast.WhileExpr():
-            while interpret(node.condition, symtab):
-                interpret(node.body, symtab)
+        case ast.WhileExpr(condition, body):
+            while True:
+                try:
+                    cond_value = interpret(condition, symtab)
+                    if not cond_value:
+                        break
+                    try:
+                        interpret(body, symtab)
+                    except ContinueException:
+                        continue
+                except BreakException as e:
+                    # If break carries a return value, the return value is processed
+                    if e.value is not None:
+                        return e.value
+                    break
             return None
 
         case ast.Module(functions, expression):
-            # 首先处理所有函数定义，将它们添加到符号表中
+            # First process all function definitions, adding them to the symbol table
             for func in functions:
-                # 函数被绑定到一个特殊的处理函数上，以便后续调用
-                symtab.define_variable(func.name, (func, "function"),func.return_type)
+                # The function is bound to a special handler function for subsequent calls
+                symtab.define_variable(func.name, (func, "function"), func.return_type)
                 print(symtab.lookup_variable(func.name))
-            # 处理顶级表达式
+            # Process top-level expressions
             if expression is not None:
                 return interpret(expression, symtab)
             return None
@@ -115,6 +134,12 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
             result = interpret(func.body, symtab)
             symtab.leave_scope()
             return result
+
+        case ast.Break(value):
+            # if break has value, return optional value
+            raise BreakException(interpret(value, symtab) if value else None)
+        case ast.Continue():
+            raise ContinueException()
 
         case _:
             raise Exception(f'Unsupported AST node: "{node}"')

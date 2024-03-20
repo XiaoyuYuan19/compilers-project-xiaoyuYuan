@@ -36,7 +36,7 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
 
 
     instructions: list[ir.Instruction] = []
-    def visit(node: ast.Expression) -> IRvar:
+    def visit(node: ast.Expression,loop_start : ir.Label= None, loop_end: ir.Label = None) -> IRvar:
         nonlocal symtab
         var_type = typecheck(node, symtab)
 
@@ -149,20 +149,38 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
                 instructions.append(ir.Call(fun=func_var, args=arg_vars, dest=result_var))
                 return result_var
 
+            case ast.WhileExpr(condition, body):
+                start_label = new_label()
+                end_label = new_label()
+                continue_label = new_label()  # Optional: To handle continue statements
 
-    # case ast.FunctionCall():
-            #     args_vars = [visit(arg)[1] for arg in node.arguments]  # Generate IR code for each parameter
-            #     if node.name in ["print_int", "print_bool"]:  # Assume these functions are already defined
-            #         func_var = IRvar(node.name)  # Special processing built-in function
-            #         result_var = new_var(Unit())  # Assume these functions have no return value
-            #         instructions.append(ir.Call(fun=func_var, args=args_vars, dest=result_var))
-            #     else:
-            #         # For user-defined functions, additional processing logic needs to be added
-            #         pass
-            #     return result_var
-            #
-            # case _:
-            #         raise Exception(f"Unsupported ASTnode: {node}")
+                # Jump to the conditional judgment before the loop starts
+                instructions.append(ir.Jump(label=start_label))
+                instructions.append(continue_label)  # continue statement jumps here
+
+                cond_var = visit(condition)
+                # Break out of the loop when the condition is false
+                instructions.append(ir.CondJump(cond=cond_var, then_label=start_label, else_label=end_label))
+
+                # Loop body
+                visit(body, loop_start=start_label, loop_end=end_label)
+
+                # After the loop ends, jump to the beginning of the loop and continue with the next iteration
+                instructions.append(ir.Jump(label=continue_label))
+                instructions.append(start_label)  # The position where the loop starts
+
+                # End of loop
+                instructions.append(end_label)
+                return None
+
+            case ast.Break(value):
+                if value:
+                    value_var = visit(value, symtab, instructions, loop_start, loop_end)
+                    instructions.append(ir.Copy(source=value_var, dest=value_var))  # 假设有 loop_result_var
+                instructions.append(ir.Jump(label=loop_end))
+            case ast.Continue():
+                instructions.append(ir.Jump(label=loop_start))
+
 
     var_result = visit(root_node)
     print(var_result,var_types)

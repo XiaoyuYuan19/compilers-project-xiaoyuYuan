@@ -11,6 +11,7 @@ class Token:
 
 def tokenize(source_code: str) -> List[Token]:
     token_specs = [
+        ("address_of", re.compile(r'&')),  # Add address fetch operator
         ("multiline_comment", re.compile(r'/\*.*?\*/', re.DOTALL)),  # Skip multi-line comments
         ("singleline_comment", re.compile(r'//.*?\n')),  # Skip single-line comments
         ("singleline_comment_alt", re.compile(r'#.*?\n')),  # Skip single-line comments (alternate)

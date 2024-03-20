@@ -1,6 +1,6 @@
 from src.compiler import ast
 from src.compiler.tokenizer import Token
-from src.compiler.types import Int, Bool, Type
+from src.compiler.types import Int, Bool, Type, PointerType
 
 precedence_levels = [
     ['='],
@@ -94,6 +94,17 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
             return parse_factor()
 
     def parse_factor() -> ast.Expression:
+        if peek().text == '&':
+            consume('&')
+            expr = parse_factor()  # recursive call to support successive address fetching operations
+            return ast.AddressOf(expr=expr)
+        elif peek().text == '*':
+            next_pos = pos + 1
+            # Check if the next token is an identifier or parenthesis to disambiguate references and multiplications
+            if tokens[next_pos].type in ['identifier', '(']:
+                consume('*')
+                expr = parse_factor()  # recursive call to support successive dereferencing operations
+                return ast.Dereference(expr=expr)
         if peek().text == '(':
             return parse_parenthesized()
         elif peek().text == '{':
@@ -246,8 +257,15 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
             return Int()
         elif token.text == "Bool":
             return Bool()
-        else:
-            raise Exception(f"Unknown type: {token.text}")
+
+        if peek().text == '*':
+            consume('*')
+            return ast.PointerType(base_type=parse_type_expr(peek().text))  # 递归支持多级指针
+        return {'Int': Int(), 'Bool': Bool()}[peek().text]
+        # else:
+        #     raise Exception(f"Unknown type: {token.text}")
+
+
 
     def parse_var_decl() -> ast.VarDecl:
         name_token = consume('var')  # Consume the function name token, capturing the function name
@@ -256,11 +274,20 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
         type_annotation = None
         if peek().text == ":":
             consume(":")
-            type_annotation = parse_type_expr(consume())
+            base = consume()
+            type_annotation = parse_type_expr(base)
+            if peek().text == '*':
+                consume('*')
+                print(type_annotation)
+                type_annotation =  ast.PointerType(base_type=base.text)  # 递归支持多级指针
         else:
             type_annotation = None
         consume("=")
-        value = parse_expression().value
+        val_ast = parse_expression()
+        if (isinstance(val_ast, ast.AddressOf)):
+            value = val_ast.expr
+        else:
+            value = val_ast.value
         # bool or int
         return ast.VarDecl(name=name,  value=value,type_annotation=type_annotation)
 

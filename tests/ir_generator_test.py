@@ -1,6 +1,7 @@
 import unittest
 
 from src.compiler import ast
+from src.compiler.ast import Continue, Break
 from src.compiler.ir import Call, LoadIntConst, IRvar, Label, Jump, Copy, CondJump, LoadBoolConst
 from src.compiler.ir_generator import generate_ir
 from src.compiler.parser import parse
@@ -183,6 +184,24 @@ class TestIRGenerator(unittest.TestCase):
                                      args=[],
                                      dest=IRvar('x4')),
                           Call(fun=IRvar('print_int'), args=[IRvar('x4')], dest=IRvar('x5'))]
+
+
+class TestIRGenerator(unittest.TestCase):
+    def test_loop_with_break_and_continue(self):
+        # Create a simple looping AST node with break and continue.
+        loop = ast.WhileExpr(
+            condition=ast.Literal(True),
+            body=ast.Block(
+                expressions=[Continue(), Break()],
+                result_expression=None
+            )
+        )
+        instructions = generate_ir(loop)
+
+        # Check if the generated IR contains a jump instruction
+        self.assertTrue(any(isinstance(inst, Jump) for inst in instructions))
+        self.assertTrue(any(isinstance(inst, CondJump) for inst in instructions))
+        # Add more assertions as needed to verify the correctness of the IR
 
 if __name__ == '__main__':
     unittest.main()

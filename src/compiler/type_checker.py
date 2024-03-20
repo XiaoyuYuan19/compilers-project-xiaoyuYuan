@@ -143,13 +143,30 @@ def typecheck(node: ast.Expression, symtab: SymTab) -> Type:
                 symtab.define_variable(func.name, func.body, typecheck(func,symtab))
                 print(symtab.lookup_variable(func.name))
 
-
         case ast.FunctionDef():
             params_types = []
             for p in node.params:
                 params_types.append(p[1])
             return FunctionType(params_types,node.return_type)
 
+        case ast.Break(value):
+            if value:
+                value_type = typecheck(value, symtab)
+                # Ensure that the value_type matches the expected return type of the loop
+            return Unit()
+
+        case ast.Continue():
+            return Unit()
+
+        case ast.AddressOf(expr):
+            expr_type = typecheck(expr, symtab)
+            return ast.PointerType(expr_type)
+        case ast.Dereference(expr):
+            expr_type = typecheck(expr, symtab)
+            if isinstance(expr_type, ast.PointerType):
+                return expr_type.base_type
+            else:
+                raise TypeError("Dereference of a non-pointer type")
 
         case _:
             raise Exception(f'Unsupported AST node: {node}.')

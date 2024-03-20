@@ -1,4 +1,3 @@
-
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
@@ -77,8 +76,29 @@ class FunctionDef:
     return_type: Type
     body: List[Expression]
 
-
 @dataclass
 class Module:
     functions: List[FunctionDef]
     expression: Optional[Expression] = None
+
+
+# For break and continue
+@dataclass
+class Break(Expression):
+    value: Optional[Expression] = None  # Optional return value
+
+@dataclass
+class Continue(Expression):
+    pass
+
+@dataclass
+class PointerType(Expression):
+    base_type: Expression  # 基础类型
+
+@dataclass
+class AddressOf(Expression):
+    expr: Expression  # 取地址的表达式
+
+@dataclass
+class Dereference(Expression):
+    expr: Expression  # 要解引用的指针表达式
