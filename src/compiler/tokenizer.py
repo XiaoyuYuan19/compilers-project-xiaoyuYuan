@@ -15,10 +15,11 @@ def tokenize(source_code: str) -> List[Token]:
         ("singleline_comment", re.compile(r'//.*?\n')),  # Skip single-line comments
         ("singleline_comment_alt", re.compile(r'#.*?\n')),  # Skip single-line comments (alternate)
         ("whitespace", re.compile(r'\s+')),  # Skip whitespace
+        ("bool_literal", re.compile(r'True|true|False|false')),
         ("int_literal", re.compile(r'\b[0-9]+\b')),
         ("identifier", re.compile(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b')),
         # Longer operators must be before shorter ones that are their substrings
-        ("operator", re.compile(r'==|!=|<=|>=|<<|>>|\+\+|--|\+=|-=|\*=|/=|&&|\|\||[+\-*/=<>]')),
+        ("operator", re.compile(r':|==|!=|<=|>=|<<|>>|\+\+|--|\+=|-=|\*=|/=|&&|\|\||[%+\-*/=<>]')),
         ("parenthesis", re.compile(r'[{}()\[\],;]')),
     ]
 

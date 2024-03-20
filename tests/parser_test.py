@@ -9,6 +9,7 @@ from src.compiler.tokenizer import tokenize
 class MyTestCase(unittest.TestCase):
     def test_parser(self):
         assert parse(tokenize('1')) == ast.Literal(1)
+        print(parse(tokenize('1')))
         assert parse(tokenize(" 1 + 2 ")) == ast.BinaryOp(
             left=ast.Literal(1),
             op='+',
@@ -113,6 +114,14 @@ class MyTestCase(unittest.TestCase):
                 cond=ast.Literal(1),then_clause=ast.Literal(2),else_clause=ast.Literal(3),
                 )
         )
+        assert parse(tokenize("0 + if 1 then 2 else 3 + 2")) == ast.BinaryOp(
+            left=ast.Literal(0),
+            op='+',
+            right=ast.IfExpression(
+                cond=ast.Literal(1),then_clause=ast.Literal(2),else_clause=ast.BinaryOp(
+                    left=ast.Literal(3),op='+',right=ast.Literal(2)),
+                )
+        )
 
     def test_parse_right_associativity(self):
         assert parse(tokenize("2 + 3 + 4"),right_associative=True) == ast.BinaryOp(
@@ -125,6 +134,43 @@ class MyTestCase(unittest.TestCase):
             )
         )
 
+    def test_parse_function_call(self):
+        # 假设tokenize和Token类已正确处理并识别函数调用和参数
+        tokens = tokenize("f ( x, y + z )")
+        parsed_expression = parse(tokens)
+        assert parsed_expression == ast.FunctionCall(
+            name='f',
+            arguments=[
+                ast.Identifier(name='x'),
+                ast.BinaryOp(
+                    left=ast.Identifier(name='y'),
+                    op='+',
+                    right=ast.Identifier(name='z')
+                )
+            ]
+        )
+
+    def test_parse_block(self):
+        tokens = tokenize("{ f(a); x = y; f(x) }")
+        parsed_block = parse(tokens)
+        print(parsed_block)
+        assert parsed_block == ast.Block(
+            expressions=[
+                ast.FunctionCall(
+                    name='f',
+                    arguments=[ast.Identifier(name='a')]
+                ),
+                ast.BinaryOp(
+                    left=ast.Identifier(name='x'),
+                    op='=',
+                    right=ast.Identifier(name='y')
+                )
+            ],
+            result_expression=ast.FunctionCall(
+                name='f',
+                arguments=[ast.Identifier(name='x')]
+            )
+        )
 
 if __name__ == '__main__':
     unittest.main()
