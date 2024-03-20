@@ -1,6 +1,6 @@
 from src.compiler import ast
 from src.compiler.tokenizer import Token
-from src.compiler.types import Int, Bool
+from src.compiler.types import Int, Bool, Type
 
 precedence_levels = [
     ['='],
@@ -29,10 +29,10 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
         nonlocal pos
         token = peek()
         if isinstance(expected, str) and token.text != expected:
-            raise Exception(f'{token.loc}: expected "{expected}"')
+            raise Exception(f'{token}: expected "{expected}"')
         if isinstance(expected, list) and token.text not in expected:
             comma_separated = ", ".join([f'"{e}"' for e in expected])
-            raise Exception(f'{token.loc}: expected one of: {comma_separated}')
+            raise Exception(f'{token}: expected one of: {comma_separated}')
         pos += 1
         return token
 
@@ -124,8 +124,13 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
         result_expression = None
 
         while not peek().text == '}':
-
-            if peek().text in ['if', 'while', '{']:  # Starting a new block or control structure
+            if peek().text == 'return':
+                consume('return')
+                result_expression = parse_expression()
+                # expressions.append(result_expression)
+                if peek().text == ';':
+                    consume(';')
+            elif peek().text in ['if', 'while', '{']:  # Starting a new block or control structure
                 expr = parse_expression()
                 expressions.append(expr)
                 # Check if next token is '}', in which case, this block/expression might be the result_expression
@@ -147,7 +152,7 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
                     expressions.append(expr)
 
                 else:
-                    raise Exception(f"{peek().loc}: Expected ';' or '}}' but found '{peek().text}'")
+                    raise Exception(f"{peek()}: Expected ';' or '}}' but found '{peek().text}'")
 
         consume('}')
         # return BlockExpr(expressions, result_expression)
@@ -197,14 +202,6 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
         expr = parse_expression()
         consume(')')
         return expr
-
-    # def parse_var_decl() -> ast.VarDecl:
-    #     name_token = consume('var')  # Consume the function name token, capturing the function name
-    #     function_location = name_token.loc
-    #     name_token = consume()  # Expect an identifier next
-    #     consume('=')  # Expect an '=' after the identifier
-    #     value = parse_expression()  # Parse the initialization expression
-    #     return ast.VarDecl(name=name_token.text, value=value,location=function_location)
 
     def parse_expression_right() -> ast.Expression:
         left = parse_term()
@@ -267,7 +264,49 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
         # bool or int
         return ast.VarDecl(name=name,  value=value,type_annotation=type_annotation)
 
-    res = parse_expression()
+    def parse_function_definition() -> ast.FunctionDef:
+        """
+        Parses a function definition from the token list.
+        A function definition consists of the 'fun' keyword, followed by the function name,
+        a parameter list, a return type, and a block of code as the function body.
+        """
+        consume('fun')  # Consume the 'fun' keyword
+        name = consume().text  # Function name
+        consume('(')
+        params = []
+        while peek().text != ')':
+            param_name = consume().text  # Parameter name
+            consume(':')
+            param_type = parse_type_expr(consume())  # Parameter type
+            params.append((param_name, param_type))
+            if peek().text == ',':
+                consume(',')
+        consume(')')
+        if peek().text == ':':
+            consume(':')
+            return_type = parse_type_expr(consume())  # Return type
+        else:
+            return_type = None
+        body = parse_block()  # Function body
+        return ast.FunctionDef(name=name, params=params, return_type=return_type, body=body)
+
+    def parse_module() -> ast.Module:
+        """
+        Parses a module from the token list. A module can contain multiple function
+        definitions and optionally a top-level expression.
+        """
+        functions = []
+        while peek().text == 'fun':
+            function_def = parse_function_definition()  # Parse each function definition
+            functions.append(function_def)
+        expression = None
+        if peek().type != 'end':  # If there are tokens left, parse the top-level expression
+            expression = parse_expression()
+        return ast.Module(functions=functions, expression=expression)
+
+    res = parse_module()
+    if peek().text == ';':
+        consume(';')
     if peek().type != 'end':
         raise Exception(f"Unexpected token at {peek()}: '{peek().text}'")
 

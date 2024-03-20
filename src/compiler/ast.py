@@ -1,6 +1,8 @@
 
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Tuple
+
+from src.compiler.types import Type
 
 
 @dataclass
@@ -65,3 +67,18 @@ class CaseExpr(Expression):
     value: Expression
     clauses: List[CaseClause]
     default: Optional[Expression] = None
+
+
+# For customizable function
+@dataclass
+class FunctionDef:
+    name: str
+    params: List[Tuple[str, Type]]
+    return_type: Type
+    body: List[Expression]
+
+
+@dataclass
+class Module:
+    functions: List[FunctionDef]
+    expression: Optional[Expression] = None

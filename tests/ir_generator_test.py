@@ -161,5 +161,23 @@ class TestIRGeneratorScopes(unittest.TestCase):
                                   Copy(source=IRvar('x3'), dest=IRvar('x4')),
                                   Call(fun=IRvar('print_int'), args=[IRvar('x4')], dest=IRvar('x5'))]
 
+class TestIRGenerator(unittest.TestCase):
+    def test_binary_op_addition(self):
+        source_code = """
+        fun main() {
+            1 + 2
+        }
+        """
+        module_ast = parse(tokenize(source_code))
+        ir_map = generate_ir(module_ast)
+        main_ir = ir_map["main"]
+        # Assuming IRvar naming starts with 'x' followed by an incremental number
+        expected_ir = [
+            LoadIntConst(value=1, dest=IRvar('x1')),
+            LoadIntConst(value=2, dest=IRvar('x2')),
+            # Assuming Call instruction for addition and further instructions as needed
+        ]
+        self.assertEqual(main_ir[:len(expected_ir)], expected_ir)  # Compare the initial part of the IR list
+
 if __name__ == '__main__':
     unittest.main()

@@ -111,13 +111,13 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
                 return result_var
 
             case ast.FunctionCall():
-                args_vars = [visit(arg)[1] for arg in node.arguments]  # 为每个参数生成IR代码
-                if node.name in ["print_int", "print_bool"]:  # 假设这些函数已经定义
-                    func_var = IRvar(node.name)  # 特殊处理内建函数
-                    result_var = new_var(Unit())  # 假设这些函数没有返回值
+                args_vars = [visit(arg)[1] for arg in node.arguments]  # Generate IR code for each parameter
+                if node.name in ["print_int", "print_bool"]:  # Assume these functions are already defined
+                    func_var = IRvar(node.name)  # Special processing built-in function
+                    result_var = new_var(Unit())  # Assume these functions have no return value
                     instructions.append(ir.Call(fun=func_var, args=args_vars, dest=result_var))
                 else:
-                    # 对于用户定义的函数，需要添加额外的处理逻辑
+                    # For user-defined functions, additional processing logic needs to be added
                     pass
                 return result_var
 

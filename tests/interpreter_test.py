@@ -141,5 +141,45 @@ class MyTestCase(unittest.TestCase):
         result = interpret(block, self.symtab)
         self.assertEqual(result, 2)
 
+class test_interprete_funcdel(unittest.TestCase):
+    def setUp(self):
+        self.symtab = SymTab()
+        add_builtin_symbols(self.symtab)
+    def test_function_definition(self):
+        module_code = """
+        fun square(x: Int): Int {
+            return x * x;
+        }
+        square(2)
+        """
+        tokens = tokenize(module_code)
+        module = parse(tokens)
+        print(module)
+        result = interpret(module, self.symtab)
+        self.assertEqual(result, 4)
+
+    def test_function_definition_and_call(self):
+        source_code = """
+        fun square(x: Int): Int {
+            return x * x;
+        }
+        fun add(a: Int, b: Int): Int {
+            return a + b;
+        }
+        square(add(2, 3))
+        """
+        result = interpret(parse(tokenize(source_code)), self.symtab)
+        self.assertEqual(result, 25)
+
+    def test_module_with_functions(self):
+        source_code = """
+        fun double(x: Int): Int {
+            return x * 2;
+        }
+        double(4)
+        """
+        result = interpret(parse(tokenize(source_code)), self.symtab)
+        self.assertEqual(result, 8)
+
 if __name__ == '__main__':
     unittest.main()

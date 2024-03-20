@@ -85,5 +85,35 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
             while interpret(node.condition, symtab):
                 interpret(node.body, symtab)
             return None
+
+        case ast.Module(functions, expression):
+            # 首先处理所有函数定义，将它们添加到符号表中
+            for func in functions:
+                # 函数被绑定到一个特殊的处理函数上，以便后续调用
+                symtab.define_variable(func.name, (func, "function"),func.return_type)
+            # 处理顶级表达式
+            if expression is not None:
+                return interpret(expression, symtab)
+            return None
+
+        case ast.FunctionDef(name, params, return_type, body):
+            # FunctionDef nodes should be processed during Module processing and should not be called directly by interpret
+            raise RuntimeError(f"Unexpected FunctionDef node in interpret: {name}")
+
+        case ast.FunctionCall(name, arguments):
+            func, func_type = symtab.lookup_variable(name)
+            if func_type != "function":
+                raise TypeError(f"{name} is not a function")
+            # Create a new scope for function calls
+            symtab.enter_scope()
+            # Bind the parameter value to the new scope
+            for param, arg in zip(func.params, arguments):
+                arg_value = interpret(arg, symtab)
+                symtab.define_variable(param[0], arg_value, arg)
+            # Execute function body
+            result = interpret(func.body, symtab)
+            symtab.leave_scope()
+            return result
+
         case _:
             raise Exception(f'Unsupported AST node: "{node}"')
