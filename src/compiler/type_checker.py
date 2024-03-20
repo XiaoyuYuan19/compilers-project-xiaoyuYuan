@@ -136,6 +136,20 @@ def typecheck(node: ast.Expression, symtab: SymTab) -> Type:
             #     raise TypeError("Body of 'while' must not produce a value")
             return types.Unit()
 
+        case ast.Module():
+            # 首先处理所有函数定义，将它们添加到符号表中
+            for func in node.functions:
+                # 函数被绑定到一个特殊的处理函数上，以便后续调用
+                symtab.define_variable(func.name, func.body, typecheck(func,symtab))
+                print(symtab.lookup_variable(func.name))
+
+
+        case ast.FunctionDef():
+            params_types = []
+            for p in node.params:
+                params_types.append(p[1])
+            return FunctionType(params_types,node.return_type)
+
 
         case _:
             raise Exception(f'Unsupported AST node: {node}.')

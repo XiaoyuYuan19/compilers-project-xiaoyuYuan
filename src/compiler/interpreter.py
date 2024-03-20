@@ -111,7 +111,6 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
             for param, arg in zip(func.params, arguments):
                 arg_value = interpret(arg, symtab)
                 symtab.define_variable(param[0], arg_value, arg)
-
             # Execute function body
             result = interpret(func.body, symtab)
             symtab.leave_scope()

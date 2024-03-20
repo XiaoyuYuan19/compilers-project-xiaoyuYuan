@@ -1,3 +1,5 @@
+import types
+
 from src.compiler import ast, ir
 from src.compiler.SymTab import SymTab, add_builtin_symbols
 from src.compiler.ir import IRvar
@@ -92,6 +94,8 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
 
             case ast.Block():
                 symtab.enter_scope()  # Enter a new scope
+                if node.expressions == []:
+                    exp_var = None
                 for expr in node.expressions:
                     exp_var = visit(expr)  # Generate IR code for each expression in the block
                     print(exp_var)
@@ -110,26 +114,63 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
                 instructions.append(ir.Copy(source=node.value, dest=result_var))
                 return result_var
 
-            case ast.FunctionCall():
-                args_vars = [visit(arg)[1] for arg in node.arguments]  # Generate IR code for each parameter
-                if node.name in ["print_int", "print_bool"]:  # Assume these functions are already defined
-                    func_var = IRvar(node.name)  # Special processing built-in function
-                    result_var = new_var(Unit())  # Assume these functions have no return value
-                    instructions.append(ir.Call(fun=func_var, args=args_vars, dest=result_var))
-                else:
-                    # For user-defined functions, additional processing logic needs to be added
-                    pass
+            case ast.Module():
+                # 首先处理所有函数定义，将它们添加到符号表中
+                for func in node.functions:
+                    # 函数被绑定到一个特殊的处理函数上，以便后续调用
+                    # symtab.define_variable(func.name, (func, "function"),func.return_type)
+
+                    # symtab.define_variable(func.name, (func, "function"), func.return_type)
+                    symtab.define_variable(func.name, func.body, typecheck(func, symtab))
+                    print(symtab.lookup_variable(func.name))
+
+                # 处理顶级表达式
+                if node.expression is not None:
+                    return visit(node.expression)
+                return None
+
+            case ast.FunctionDef(name, params, return_type, body):
+                func_symtab = SymTab(parent=symtab)  # Create a new symbol table for the function scope
+                for param_name, param_type in params:
+                    param_var = ir.IRvar(param_name)
+                    func_symtab.define_variable(param_name, param_var, param_type)
+                # Process function body in the function scope
+                for expr in body:
+                    visit(expr)
+                # Note: Add the function to the parent symbol table if needed
+
+            case ast.FunctionCall(name, arguments):
+                # Look up the function and its type
+                func_var, func_type = symtab.lookup_variable(name,True)
+                visit(func_var)
+                print('fuva',func_var,func_type)
+                arg_vars = [visit(arg) for arg in arguments]
+                result_var = new_var(func_type.return_type)
+                instructions.append(ir.Call(fun=func_var, args=arg_vars, dest=result_var))
                 return result_var
 
-            case _:
-                    raise Exception(f"Unsupported ASTnode: {node}")
+
+    # case ast.FunctionCall():
+            #     args_vars = [visit(arg)[1] for arg in node.arguments]  # Generate IR code for each parameter
+            #     if node.name in ["print_int", "print_bool"]:  # Assume these functions are already defined
+            #         func_var = IRvar(node.name)  # Special processing built-in function
+            #         result_var = new_var(Unit())  # Assume these functions have no return value
+            #         instructions.append(ir.Call(fun=func_var, args=args_vars, dest=result_var))
+            #     else:
+            #         # For user-defined functions, additional processing logic needs to be added
+            #         pass
+            #     return result_var
+            #
+            # case _:
+            #         raise Exception(f"Unsupported ASTnode: {node}")
 
     var_result = visit(root_node)
     print(var_result,var_types)
-    if str(var_types[var_result]) == 'Int':
-        instructions.append(ir.Call(IRvar('print_int'),[var_result],new_var(Int())))
-    if str(var_types[var_result]) == 'Bool':
-        instructions.append(ir.Call(IRvar('print_bool'),[var_result],new_var(Int())))
+    if var_result != None:
+        if str(var_types[var_result]) == 'Int':
+            instructions.append(ir.Call(IRvar('print_int'),[var_result],new_var(Int())))
+        if str(var_types[var_result]) == 'Bool':
+            instructions.append(ir.Call(IRvar('print_bool'),[var_result],new_var(Int())))
 
 
     return instructions

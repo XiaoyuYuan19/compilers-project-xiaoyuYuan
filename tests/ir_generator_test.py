@@ -1,5 +1,6 @@
 import unittest
 
+from src.compiler import ast
 from src.compiler.ir import Call, LoadIntConst, IRvar, Label, Jump, Copy, CondJump, LoadBoolConst
 from src.compiler.ir_generator import generate_ir
 from src.compiler.parser import parse
@@ -164,20 +165,24 @@ class TestIRGeneratorScopes(unittest.TestCase):
 class TestIRGenerator(unittest.TestCase):
     def test_binary_op_addition(self):
         source_code = """
-        fun main() {
+        fun main() : Int {
             1 + 2
         }
+        main()
         """
         module_ast = parse(tokenize(source_code))
+        print(module_ast)
         ir_map = generate_ir(module_ast)
-        main_ir = ir_map["main"]
-        # Assuming IRvar naming starts with 'x' followed by an incremental number
-        expected_ir = [
-            LoadIntConst(value=1, dest=IRvar('x1')),
-            LoadIntConst(value=2, dest=IRvar('x2')),
-            # Assuming Call instruction for addition and further instructions as needed
-        ]
-        self.assertEqual(main_ir[:len(expected_ir)], expected_ir)  # Compare the initial part of the IR list
+        assert ir_map == [LoadIntConst(value=1, dest=IRvar('x1')),
+                          LoadIntConst(value=2, dest=IRvar('x2')),
+                          Call(fun=IRvar('+'), args=[IRvar('x1'), IRvar('x2')], dest=IRvar('x3')),
+                          Copy(source=None, dest=IRvar('x3')),
+                          Call(fun=
+                               ast.Block(expressions=[],
+                                     result_expression=ast.BinaryOp(left=ast.Literal(value=1), op='+', right=ast.Literal(value=2))),
+                                     args=[],
+                                     dest=IRvar('x4')),
+                          Call(fun=IRvar('print_int'), args=[IRvar('x4')], dest=IRvar('x5'))]
 
 if __name__ == '__main__':
     unittest.main()

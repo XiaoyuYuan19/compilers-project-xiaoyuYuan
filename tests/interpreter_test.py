@@ -196,5 +196,18 @@ class TestInterpreterFunctions(unittest.TestCase):
         result = interpret(module, self.symtab)
         self.assertEqual(result, 5)
 
+    def test_function_definition_and_Recursion (self):
+        source_code = """
+        fun square(x: Int): Int {
+            return x * x;
+        }
+        fun square_sum(a: Int, b: Int): Int {
+            return square(a) + square(b);
+        }
+        square_sum(2,3)
+        """
+        result = interpret(parse(tokenize(source_code)), self.symtab)
+        self.assertEqual(result, 13)
+
 if __name__ == '__main__':
     unittest.main()

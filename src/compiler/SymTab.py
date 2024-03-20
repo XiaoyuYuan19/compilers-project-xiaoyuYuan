@@ -20,12 +20,14 @@ class SymTab(Generic[T]):
     def leave_scope(self):
         self.scopes.pop()
 
-    def lookup_variable(self, name):
+    def lookup_variable(self, name, flag=False):
         for scope in reversed(self.scopes):
             if name in scope:
                 value = scope[name]
                 if str(type(value)) == "<class 'tuple'>":
-                    return scope[name][0]
+                    if flag: return scope[name]
+                    else:
+                        return scope[name][0]
                 else:
                     return scope[name]
         raise KeyError(f"Variable '{name}' not found.")
