@@ -1,6 +1,6 @@
 import dataclasses
 
-from src.compiler import ast, ir
+from src.model import ir
 from src.compiler.intrinsics import all_intrinsics, IntrinsicArgs
 
 

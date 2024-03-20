@@ -1,7 +1,7 @@
 import unittest
 
 from src.compiler.ana_opt import split_into_basic_blocks, build_flowgraph
-from src.compiler.ir import CondJump
+from src.model.ir import CondJump
 from src.compiler.ir_generator import generate_ir
 from src.compiler.parser import parse
 from src.compiler.tokenizer import tokenize

@@ -1,11 +1,11 @@
 import unittest
 
-from src.compiler import types, ast
-from src.compiler.SymTab import SymTab, add_builtin_symbols
+from src.model import types, ast
+from src.model.SymTab import SymTab, add_builtin_symbols
 from src.compiler.parser import parse
 from src.compiler.tokenizer import tokenize
 from src.compiler.type_checker import typecheck
-from src.compiler.types import Int, Bool, Unit
+from src.model.types import Int, Bool, Unit
 
 
 def assert_fails_typecheck(code: str) -> None:

@@ -1,8 +1,8 @@
 
 from typing import Generic, TypeVar, Dict, Any, List
 
-from src.compiler import types, ast
-from src.compiler.types import Int, Bool, FunctionType, Unit, Type
+from src.model import types, ast
+from src.model.types import Int, Bool, FunctionType, Unit, Type
 
 # Create a type variable for the SymTab class
 T = TypeVar('T')

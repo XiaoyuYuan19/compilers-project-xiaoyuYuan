@@ -1,4 +1,4 @@
-from src.compiler.ir import Label, Jump, CondJump
+from src.model.ir import Label, Jump, CondJump
 
 
 class BasicBlock:

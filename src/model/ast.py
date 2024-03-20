@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
-from src.compiler.types import Type
+from src.model.types import Type
 
 
 @dataclass

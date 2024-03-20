@@ -1,8 +1,8 @@
 import unittest
 
-from src.compiler import ast
-from src.compiler.ast import Break, Continue, WhileExpr, Literal
-from src.compiler.types import Int
+from src.model import ast
+from src.model.ast import Break, Continue, WhileExpr, Literal
+from src.model.types import Int
 
 
 class TestASTNodes(unittest.TestCase):

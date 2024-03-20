@@ -1,6 +1,6 @@
-from src.compiler import ast
+from src.model import ast
 from src.compiler.tokenizer import Token
-from src.compiler.types import Int, Bool, Type, PointerType
+from src.model.types import Int, Bool, Type, PointerType
 
 precedence_levels = [
     ['='],

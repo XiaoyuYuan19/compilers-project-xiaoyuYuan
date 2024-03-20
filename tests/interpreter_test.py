@@ -1,11 +1,10 @@
 import unittest
 
-from src.compiler import ast
-from src.compiler.SymTab import SymTab, add_builtin_symbols
+from src.model import ast
+from src.model.SymTab import SymTab, add_builtin_symbols
 from src.compiler.interpreter import interpret, BreakException
 from src.compiler.parser import parse
 from src.compiler.tokenizer import tokenize
-from src.compiler.types import Int, Unit
 
 
 class MyTestCase(unittest.TestCase):

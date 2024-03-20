@@ -1,10 +1,10 @@
 import unittest
 
 
-from src.compiler import ast
+from src.model import ast
 from src.compiler.parser import parse
 from src.compiler.tokenizer import tokenize
-from src.compiler.types import Int
+from src.model.types import Int
 
 
 class MyTestCase(unittest.TestCase):

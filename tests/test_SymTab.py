@@ -1,6 +1,6 @@
 import unittest
-from src.compiler.SymTab import SymTab
-from src.compiler.types import Int, FunctionType
+from src.model.SymTab import SymTab
+from src.model.types import Int, FunctionType
 
 class TestSymTab(unittest.TestCase):
     def test_define_and_lookup_function(self):

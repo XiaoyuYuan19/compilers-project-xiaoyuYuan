@@ -1,8 +1,8 @@
 import unittest
 
-from src.compiler import ast
-from src.compiler.ast import Continue, Break
-from src.compiler.ir import Call, LoadIntConst, IRvar, Label, Jump, Copy, CondJump, LoadBoolConst
+from src.model import ast
+from src.model.ast import Continue, Break
+from src.model.ir import Call, LoadIntConst, IRvar, Label, Jump, Copy, CondJump
 from src.compiler.ir_generator import generate_ir
 from src.compiler.parser import parse
 from src.compiler.tokenizer import tokenize

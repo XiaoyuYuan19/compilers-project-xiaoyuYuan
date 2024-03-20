@@ -1,7 +1,7 @@
 from typing import Any
 
-from src.compiler import ast
-from src.compiler.SymTab import SymTab
+from src.model import ast
+from src.model.SymTab import SymTab
 from src.compiler.type_checker import typecheck
 
 Value = int | bool | None

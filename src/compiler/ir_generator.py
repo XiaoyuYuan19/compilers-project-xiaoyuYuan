@@ -1,10 +1,9 @@
-import types
-
-from src.compiler import ast, ir
-from src.compiler.SymTab import SymTab, add_builtin_symbols
-from src.compiler.ir import IRvar
+from src.model import ast
+from src.model import ir
+from src.model.SymTab import SymTab, add_builtin_symbols
+from src.model.ir import IRvar
 from src.compiler.type_checker import typecheck
-from src.compiler.types import Type, Unit, Int, Bool
+from src.model.types import Type, Unit, Int
 
 
 def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
@@ -36,14 +35,14 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
 
 
     instructions: list[ir.Instruction] = []
-    def visit(node: ast.Expression,loop_start : ir.Label= None, loop_end: ir.Label = None) -> IRvar:
+    def visit(node: ast.Expression, loop_start : ir.Label= None, loop_end: ir.Label = None) -> IRvar:
         nonlocal symtab
         var_type = typecheck(node, symtab)
 
         match node:
             case ast.Literal():
                 var = new_var(var_type)
-                instructions.append(ir.LoadIntConst(node.value,var))
+                instructions.append(ir.LoadIntConst(node.value, var))
                 return var
             case ast.Identifier():
                 return new_var(symtab.lookup_variable_type(node.name))
@@ -186,9 +185,9 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
     print(var_result,var_types)
     if var_result != None:
         if str(var_types[var_result]) == 'Int':
-            instructions.append(ir.Call(IRvar('print_int'),[var_result],new_var(Int())))
+            instructions.append(ir.Call(IRvar('print_int'), [var_result], new_var(Int())))
         if str(var_types[var_result]) == 'Bool':
-            instructions.append(ir.Call(IRvar('print_bool'),[var_result],new_var(Int())))
+            instructions.append(ir.Call(IRvar('print_bool'), [var_result], new_var(Int())))
 
 
     return instructions

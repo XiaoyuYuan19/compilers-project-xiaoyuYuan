@@ -1,6 +1,6 @@
-from src.compiler import ast, types
-from src.compiler.SymTab import SymTab
-from src.compiler.types import Type, Int, Bool, Unit, FunctionType
+from src.model import ast, types
+from src.model.SymTab import SymTab
+from src.model.types import Type, Unit, FunctionType
 
 def typecheck_var_decl(node: ast.VarDecl, symtab: SymTab) -> types.Type:
     value_type = typecheck(node.value, symtab)
