@@ -1,69 +1,41 @@
 import re
 from dataclasses import dataclass
-from typing import Literal
+from typing import List, Literal
 
+TokenType = Literal["int_literal", "identifier", "operator", "parenthesis", "end"]
 
-TokenType = Literal["ini_literal", "identifier","parenthesis","end"]
-
-@dataclass(frozen = True)
+@dataclass(frozen=True)
 class Token:
     type: TokenType
     text: str
 
-def tokenize(source_code: str) -> list[Token]:
-    whitespace_re = re.compile(r'\s+')
-    integer_re = re.compile(r'[0-9]+')
-    identifier_re = re.compile(r'[a-zA-Z_][a-zA-Z0-9_]*')
-    operator_re = re.compile(r'[<*/+-]')
-    paren_re = re.compile(r'[()]')
+def tokenize(source_code: str) -> List[Token]:
+    token_specs = [
+        ("multiline_comment", re.compile(r'/\*.*?\*/', re.DOTALL)),  # Skip multi-line comments
+        ("singleline_comment", re.compile(r'//.*?\n')),  # Skip single-line comments
+        ("singleline_comment_alt", re.compile(r'#.*?\n')),  # Skip single-line comments (alternate)
+        ("whitespace", re.compile(r'\s+')),  # Skip whitespace
+        ("int_literal", re.compile(r'\b[0-9]+\b')),
+        ("identifier", re.compile(r'\b[a-zA-Z_][a-zA-Z0-9_]*\b')),
+        # Longer operators must be before shorter ones that are their substrings
+        ("operator", re.compile(r'==|!=|<=|>=|<<|>>|\+\+|--|\+=|-=|\*=|/=|&&|\|\||[+\-*/=<>]')),
+        ("parenthesis", re.compile(r'[{}()\[\],;]')),
+    ]
 
     position = 0
-    result: list[Token] = []
+    result: List[Token] = []
 
     while position < len(source_code):
-        match = whitespace_re.match(source_code, position)
-        if match is not None:
-            position += match.end() - position
-            continue
-
-        match = identifier_re.match(source_code, position)
-        if match is not None:
-            result.append(Token(
-                type='identifier',
-                text=source_code[position:match.end()]
-            ))
-            position = match.end()
-            continue
-
-        match = integer_re.match(source_code, position)
-        if match is not None:
-            result.append(Token(
-                type='int_literal',
-                text=source_code[position:match.end()]
-            ))
-            position = match.end()
-            continue
-
-        match = operator_re.match(source_code, position)
-        if match is not None:
-            result.append(Token(
-                type='identifier',# change oit to operater later
-                text=source_code[position:match.end()]
-            ))
-            position = match.end()
-            continue
-
-        match = paren_re.match(source_code, position)
-        if match is not None:
-            result.append(Token(
-                type='parenthesis',# change oit to operater later
-                text=source_code[position:match.end()]
-            ))
-            position = match.end()
-            continue
-
-        raise Exception(f'Tokenization failed near {source_code[position:{position + 10}]}...')
-
-        # Todo(me): 简化结构
+        match = None
+        for token_type, pattern in token_specs:
+            match = pattern.match(source_code, position)
+            if match:
+                text = match.group(0)
+                if token_type not in ["whitespace", "singleline_comment", "singleline_comment_alt", "multiline_comment"]:  # Skip certain types
+                    result.append(Token(type=token_type, text=text))
+                position = match.end()
+                break
+        else:  # If no pattern matches
+            raise Exception(f'Tokenization failed near "{source_code[position:position + 10]}"...')
 
     return result

@@ -114,5 +114,17 @@ class MyTestCase(unittest.TestCase):
                 )
         )
 
+    def test_parse_right_associativity(self):
+        assert parse(tokenize("2 + 3 + 4"),right_associative=True) == ast.BinaryOp(
+            left=ast.Literal(2),
+            op='+',
+            right=ast.BinaryOp(
+                left=ast.Literal(3),
+                op='+',
+                right=ast.Literal(4),
+            )
+        )
+
+
 if __name__ == '__main__':
     unittest.main()

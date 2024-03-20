@@ -2,7 +2,7 @@
 from src.compiler.tokenizer import Token
 from src.compiler import ast
 
-def parse(tokens: list[Token]) -> ast.Expression:
+def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
     pos = 0
 
     def peek() -> Token:
@@ -28,12 +28,17 @@ def parse(tokens: list[Token]) -> ast.Expression:
             raise Exception(f'Excepted literal, found "{token.text}"')
 
     def parse_expression() -> ast.Expression:
-        left = parse_polynomial() # implement more operator
-        while peek().text in ['<']:
-            op_token = consume()
-            right = parse_polynomial()
-            left = ast.BinaryOp(left,op_token.text,right)
-        return left
+
+        if right_associative:
+            return parse_expression_right_assoc()
+        else:
+            left = parse_polynomial() # implement more operator
+            while peek().text in ['<']:
+                op_token = consume()
+                right = parse_polynomial()
+                left = ast.BinaryOp(left,op_token.text,right)
+            return left
+
     def parse_polynomial() -> ast.Expression:
         left = parse_term() # implement more operator
         while peek().text in ['+','-']:
@@ -78,5 +83,14 @@ def parse(tokens: list[Token]) -> ast.Expression:
         expr = parse_expression()
         consume(')')
         return expr
+
+    def parse_expression_right_assoc() -> ast.Expression:
+        left = parse_term()
+        if peek().type == 'operator':
+            operator_token = consume()
+            # 递归调用parse_expression_right_assoc以保证右关联性
+            right = parse_expression_right_assoc()
+            return ast.BinaryOp(left, operator_token.text, right)
+        return left
 
     return parse_expression()
