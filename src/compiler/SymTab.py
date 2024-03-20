@@ -1,8 +1,8 @@
 
-from typing import Generic, TypeVar, Dict, Any
+from typing import Generic, TypeVar, Dict, Any, List
 
-from src.compiler import types
-from src.compiler.types import Int, Bool, FunctionType, Unit
+from src.compiler import types, ast
+from src.compiler.types import Int, Bool, FunctionType, Unit, Type
 
 # Create a type variable for the SymTab class
 T = TypeVar('T')
@@ -48,6 +48,20 @@ class SymTab(Generic[T]):
                 _, var_type = scope[name]
                 return var_type
         raise KeyError(f"Type for variable '{name}' not found.")
+
+
+
+    def define_function(self, name: str, params: List[Type], return_type: Type, body: Any = None):
+        """
+        Define a new function in the current scope.
+
+        :param name: The name of the function
+        :param params: A list of parameter types
+        :param return_type: The return type of the function
+        :param body: The body of the function (optional, used for interpreted execution)
+        """
+        func_type = FunctionType(params, return_type)
+        self.define_variable(name, (func_type, body), func_type)
 
 def add_builtin_symbols(symtab: SymTab):
 

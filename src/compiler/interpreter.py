@@ -91,6 +91,7 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
             for func in functions:
                 # 函数被绑定到一个特殊的处理函数上，以便后续调用
                 symtab.define_variable(func.name, (func, "function"),func.return_type)
+                print(symtab.lookup_variable(func.name))
             # 处理顶级表达式
             if expression is not None:
                 return interpret(expression, symtab)
@@ -110,6 +111,7 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
             for param, arg in zip(func.params, arguments):
                 arg_value = interpret(arg, symtab)
                 symtab.define_variable(param[0], arg_value, arg)
+
             # Execute function body
             result = interpret(func.body, symtab)
             symtab.leave_scope()

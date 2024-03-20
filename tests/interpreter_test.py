@@ -181,5 +181,20 @@ class test_interprete_funcdel(unittest.TestCase):
         result = interpret(parse(tokenize(source_code)), self.symtab)
         self.assertEqual(result, 8)
 
+class TestInterpreterFunctions(unittest.TestCase):
+    def setUp(self):
+        self.symtab = SymTab()
+        add_builtin_symbols(self.symtab)
+    def test_function_call(self):
+        source_code = """
+        fun add(x: Int, y: Int): Int {
+            return x + y;
+        }
+        add(2, 3)
+        """
+        module = parse(tokenize(source_code))
+        result = interpret(module, self.symtab)
+        self.assertEqual(result, 5)
+
 if __name__ == '__main__':
     unittest.main()

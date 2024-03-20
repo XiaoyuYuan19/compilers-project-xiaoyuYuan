@@ -135,5 +135,7 @@ def typecheck(node: ast.Expression, symtab: SymTab) -> Type:
             # if not isinstance(body_type, types.Unit):
             #     raise TypeError("Body of 'while' must not produce a value")
             return types.Unit()
+
+
         case _:
             raise Exception(f'Unsupported AST node: {node}.')

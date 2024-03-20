@@ -198,6 +198,20 @@ class TestTypes(unittest.TestCase):
         self.assertEqual(str(int_type1), str(int_type2))
         self.assertNotEqual(int_type1, bool_type)
 
+class test_type_check_funcdel(unittest.TestCase):
+
+    def setUp(self):
+        self.symtab = SymTab()
+        add_builtin_symbols(self.symtab)
+    # def test_function_call_type_check(self):
+    #     source_code = """
+    #             fun double(x: Int): Int {
+    #                 return x * 2;
+    #             }
+    #             double(4)
+    #             """
+    #     result_type = typecheck(parse(tokenize(source_code)), self.symtab)
+    #     self.assertEqual(result_type, Int())
 
 if __name__ == '__main__':
     unittest.main()
