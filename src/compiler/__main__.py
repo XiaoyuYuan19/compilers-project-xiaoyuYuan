@@ -46,7 +46,7 @@ def main() -> int:
 
     if command == 'interpret':
         source_code = read_source_code()
-        ...  # TODO(student)
+        # in unit test
     elif command == 'ir':
         source_code = read_source_code()
         tokens = tokenize(source_code)

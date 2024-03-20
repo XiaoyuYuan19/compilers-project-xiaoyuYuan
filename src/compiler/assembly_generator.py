@@ -29,7 +29,6 @@ def generate_assembly(instructions: list[ir.Instruction]) -> str:
 
             case ir.LoadIntConst():
                 emit(f'movq ${insn.value}, {locals.get_ref(insn.dest)}')
-                # TODO(me) doesn't work if insn.value is too large or small
 
             case ir.Copy():
                 emit(f'movq {locals.get_ref(insn.source)}, %rax')

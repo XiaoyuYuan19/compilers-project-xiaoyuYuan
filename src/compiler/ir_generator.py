@@ -176,7 +176,7 @@ def generate_ir(root_node: ast.Expression) -> list[ir.Instruction]:
             case ast.Break(value):
                 if value:
                     value_var = visit(value, symtab, instructions, loop_start, loop_end)
-                    instructions.append(ir.Copy(source=value_var, dest=value_var))  # 假设有 loop_result_var
+                    instructions.append(ir.Copy(source=value_var, dest=value_var))  #  assum. loop_result_var
                 instructions.append(ir.Jump(label=loop_end))
             case ast.Continue():
                 instructions.append(ir.Jump(label=loop_start))

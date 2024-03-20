@@ -117,11 +117,11 @@ class MyTestCase(unittest.TestCase):
         source_code = """{
         var evaluated_right_hand_side = false;
         true or { evaluated_right_hand_side = true; true };
-        evaluated_right_hand_side}# 应该为false
+        evaluated_right_hand_side}# expect be false
         """
         block = parse(tokenize(source_code))
         result = interpret(block, self.symtab)
-        self.assertEqual(result, False)  # 确认右侧未被评估
+        self.assertEqual(result, False)
 
         # 测试'and'的短路行为
         source_code = """{
@@ -131,7 +131,7 @@ class MyTestCase(unittest.TestCase):
         """
         block = parse(tokenize(source_code))
         result = interpret(block, self.symtab)
-        self.assertEqual(result, False)  # 确认右侧未被评估
+        self.assertEqual(result, False)
 
     def test_if_then_else(self):
         source_code = """{

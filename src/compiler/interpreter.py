@@ -69,8 +69,7 @@ def interpret(node: ast.Expression, symtab: SymTab) -> Value:
 
 
         case ast.VarDecl():
-            # 变量声明应该只在当前作用域中定义新变量
-            # value = interpret(node.value, symtab)
+            # Variable declarations should only define new variables in the current scope
             symtab.define_variable(node.name, node.value,typecheck(node.value,symtab))
             return node.value
 

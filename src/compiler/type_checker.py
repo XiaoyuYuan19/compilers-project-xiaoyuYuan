@@ -50,17 +50,12 @@ def typecheck(node: ast.Expression, symtab: SymTab) -> Type:
 
         case ast.BinaryOp():
             if node.op == "=":
-                # 确保左侧是标识符
                 if isinstance(node.left, ast.Identifier):
-                    # 计算右侧表达式的值
                     value = typecheck(node.right, symtab)
-                    # print('val',value)
-                    # 检查类型是否一致
                     # print('ini',symtab.lookup_variable_type(node.left.name),value)
                     if str(symtab.lookup_variable_type(node.left.name)) != str(value):
                         # if not isinstance(symtab.lookup_variable_type(node.left.name),value):
                         raise TypeError("Left side of assignment must be isinstance with right side")
-                    # 在符号表中更新或定义变量
                     symtab.update_variable(node.left.name, value)
                     return value
                 else:
@@ -137,9 +132,7 @@ def typecheck(node: ast.Expression, symtab: SymTab) -> Type:
             return types.Unit()
 
         case ast.Module():
-            # 首先处理所有函数定义，将它们添加到符号表中
             for func in node.functions:
-                # 函数被绑定到一个特殊的处理函数上，以便后续调用
                 symtab.define_variable(func.name, func.body, typecheck(func,symtab))
                 print(symtab.lookup_variable(func.name))
 

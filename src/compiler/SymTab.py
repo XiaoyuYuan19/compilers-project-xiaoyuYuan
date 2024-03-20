@@ -33,7 +33,7 @@ class SymTab(Generic[T]):
         raise KeyError(f"Variable '{name}' not found.")
 
     def update_variable(self, name, value):
-        # 在现有作用域中更新变量的值，如果变量存在
+        # Update the value of a variable in an existing scope if the variable exists
         for scope in reversed(self.scopes):
             if name in scope:
                 scope[name] = value

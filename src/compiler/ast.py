@@ -93,12 +93,12 @@ class Continue(Expression):
 
 @dataclass
 class PointerType(Expression):
-    base_type: Expression  # 基础类型
+    base_type: Expression  # basci type
 
 @dataclass
 class AddressOf(Expression):
-    expr: Expression  # 取地址的表达式
+    expr: Expression
 
 @dataclass
 class Dereference(Expression):
-    expr: Expression  # 要解引用的指针表达式
+    expr: Expression

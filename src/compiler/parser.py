@@ -10,7 +10,7 @@ precedence_levels = [
     ['<', '<=', '>', '>='],
     ['+', '-', '%'],
     ['*', '/'],
-    ['not'],  # 一元操作符的优先级
+    ['not'],
 ]
 
 def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
@@ -221,11 +221,11 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
             operator_token = consume()
             operator = operator_token.text
 
-            # 通过递归调用 `parse_expression` 来解析右边的表达式，
-            # 实现右结合性
+            # Parsing right-handed expressions by recursive calls to `parse_expression`.
+            # Realize right combinability
             right = parse_expression()
 
-            # 构建并返回一个二元操作的AST节点，左边是`left`，右边是`right`的结果
+            # Construct and return an AST node for the binary operation, with `left` on the left and `right` on the right as a result
             return ast.BinaryOp(left=left,op=operator,right=right)
         else:
             return left
@@ -279,7 +279,7 @@ def parse(tokens: list[Token], right_associative=False) -> ast.Expression:
             if peek().text == '*':
                 consume('*')
                 print(type_annotation)
-                type_annotation =  ast.PointerType(base_type=base.text)  # 递归支持多级指针
+                type_annotation =  ast.PointerType(base_type=base.text)  # multi-layer pointer
         else:
             type_annotation = None
         consume("=")
